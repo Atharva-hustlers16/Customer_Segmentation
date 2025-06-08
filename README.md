@@ -23,11 +23,7 @@
 1. [Features](#-features)  
 2. [Dataset](#-dataset)  
 3. [Quick Start](#-quick-start)  
-4. [Project Structure](#️-project-structure)  
-5. [Results](#-results)  
-6. [Contributing](#-contributing)  
-7. [License](#️-license)  
-8. [Contact](#-contact)  
+  
 
 ---
 
