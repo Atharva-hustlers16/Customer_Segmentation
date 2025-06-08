@@ -6,6 +6,7 @@ import seaborn as sns
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
 
 # --- Page Configuration with Dark Mode ---
 st.set_page_config(
@@ -88,31 +89,44 @@ ax3.set_xticklabels(['Low Spender', 'High Spender'])
 ax3.set_title("Recency by Spender Class")
 st.sidebar.pyplot(fig3)
 
-# --- Input Form ---
-with st.form("prediction_form"):
-    st.markdown("### ✏️ Enter Customer Data")
+# --- Page Navigation ---
+st.markdown("### 📄 Page Navigation")
+selected_page = st.radio("Choose a page:", ["Prediction", "Raw Data", "Data Summary"], horizontal=True)
 
-    recency = st.number_input("Recency (days since last purchase):", min_value=0, value=30)
-    frequency = st.number_input("Frequency (number of invoices):", min_value=0, value=5)
-    monetary = st.number_input("Monetary (total spending amount):", min_value=0.0, value=500.0)
+# --- Page: Raw Data ---
+if selected_page == "Raw Data":
+    st.markdown("## 📂 Raw Dataset Preview")
+    st.dataframe(rfm.head(50))
 
-    submit = st.form_submit_button("Predict")
+# --- Page: Data Summary ---
+elif selected_page == "Data Summary":
+    st.markdown("## 📊 Dataset Summary Statistics")
+    st.write(rfm.describe())
+    st.markdown("### 🔍 Null Values Check")
+    st.write(rfm.isnull().sum())
 
-# --- Make Prediction ---
-if submit:
-    input_data = np.array([[recency, frequency, monetary]])
-    input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)[0]
-    prob = model.predict_proba(input_scaled)[0][prediction]
+# --- Page: Prediction Form ---
+elif selected_page == "Prediction":
+    with st.form("prediction_form"):
+        st.markdown("### ✏️ Enter Customer Data")
 
-    spender_label = "🤑 High Spender" if prediction == 1 else "🙂 Low Spender"
-    st.success(f"Prediction: **{spender_label}**")
-    st.info(f"Model Confidence: **{prob*100:.2f}%**")
-from sklearn.metrics import accuracy_score
+        recency = st.number_input("Recency (days since last purchase):", min_value=0, value=30)
+        frequency = st.number_input("Frequency (number of invoices):", min_value=0, value=5)
+        monetary = st.number_input("Monetary (total spending amount):", min_value=0.0, value=500.0)
 
-# Evaluate model on test set
+        submit = st.form_submit_button("Predict")
+
+    if submit:
+        input_data = np.array([[recency, frequency, monetary]])
+        input_scaled = scaler.transform(input_data)
+        prediction = model.predict(input_scaled)[0]
+        prob = model.predict_proba(input_scaled)[0][prediction]
+
+        spender_label = "🤑 High Spender" if prediction == 1 else "🙂 Low Spender"
+        st.success(f"Prediction: **{spender_label}**")
+        st.info(f"Model Confidence: **{prob*100:.2f}%**")
+
+# --- Model Evaluation on Sidebar ---
 y_pred_test = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred_test)
-
 st.sidebar.markdown(f"📊 **Model Accuracy:** `{accuracy*100:.2f}%` on test data")
-
